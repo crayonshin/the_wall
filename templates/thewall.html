@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>The Wall</title>
+        <link href="https://fonts.googleapis.com/css?family=Caveat+Brush" rel="stylesheet">
+        <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}" type="text/css">
+    </head>
+    <body>
+        <div class="wrapper">
+            <a href="#"></a>
+            <header id="wallhead">
+                <h1>Welcome to "The Wall"</h1><div class="loggedin"><h2><span class="msgname">{{session["first_name"]}}</span>&nbsplogged in</h2>
+                <form class="" action="/logout" method="post">
+                    <input type="submit" name="logout" value="Logout">
+                </form></div>
+            </header>
+            <form class="newmessage" action="/newmessage" method="post">
+                <textarea name="newmessage" maxlength="390" rows="8" cols="40" placeholder="Post New Message Here"></textarea>
+                <input type="submit" name="submit" value="Submit" id="postbutton">
+            </form>
+            <div class="errorbox">
+                {% with errors = get_flashed_messages() %}
+                {% if errors %}
+                    {% for error in errors %}
+                    <p class="error">{{error}}</p>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+            <h1>Messages</h1>
+            <div id="messagesbox">
+                {% for message in messages %}
+                <div class="message">
+                    <p class="msginfo msgname">{{message["first_name"]}}&nbsp{{message["last_name"]}}</p><p class="msginfo timestamp">{{message["created_at"].strftime("%m/%d/%Y %-I:%M %p")}}</p>
+                    <p class="msgcontent">{{message["message"]}}</p>
+                {% if message["user_id"] == session["id"] and ((currentTime - message["created_at"]).seconds / 60) < 30 %}
+                    <form action="/delete_message" method="post">
+                        <input type="hidden" name="message_id" value="{{message["id"]}}">
+                        <input class="delete_button" type="submit" name="delete_message" value="Delete">
+                    </form><br>
+                {% endif %}
+                </div>
+                <div class="comment">
+                    <p id="commenthead">Comments</p>
+                    {% for comment in comments %}
+                        {% if comment["message_id"] == message["id"] %}
+                            <div class="comment_line"><p class="commenttext">{{comment["comment"]}}</p><p class="commenttext rcomment"><span class="msgname">{{comment["first_name"]}}&nbsp{{comment["last_name"]}}</span>&nbsp&nbsp{{comment["created_at"].strftime("%m/%d/%Y %-I:%M %p")}}</p></div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                    <form class="newcomment" action="/newcomment" method="post">
+                        <textarea name="newcomment" maxlength="60" rows="8" cols="40" placeholder="Post New Comment"></textarea>
+                        <input class=" delete_button comment_button" type="submit" name="submit" value="Submit">
+                        <input type="hidden" name="message_id" value="{{message["id"]}}">
+                    </form>
+                {% endfor %}
+            </div>
+        </div>
+    </body>
+</html>
